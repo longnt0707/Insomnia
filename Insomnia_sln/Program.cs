@@ -53,15 +53,15 @@ namespace Insomnia
         }
     }
 
-    //@s https://stackoverflow.com/questions/24869508/moving-mouse-to-stop-monitor-from-sleeping
+    //@d https://stackoverflow.com/questions/24869508/moving-mouse-to-stop-monitor-from-sleeping
+    //@d https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadexecutionstate
     public class PowerHelper
     {
         public static void ForceSystemAwake()
         {
             NativeMethods.SetThreadExecutionState(NativeMethods.EXECUTION_STATE.ES_CONTINUOUS |
-                                                NativeMethods.EXECUTION_STATE.ES_DISPLAY_REQUIRED |
-                                                NativeMethods.EXECUTION_STATE.ES_SYSTEM_REQUIRED |
-                                                NativeMethods.EXECUTION_STATE.ES_AWAYMODE_REQUIRED);
+                                                NativeMethods.EXECUTION_STATE.ES_AWAYMODE_REQUIRED |
+                                                NativeMethods.EXECUTION_STATE.ES_SYSTEM_REQUIRED);
         }
 
         public static void ResetSystemDefault()

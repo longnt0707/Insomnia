@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
@@ -27,23 +28,48 @@ namespace Insomnia
     {
         private NotifyIcon trayIcon;
 
+        //@d https://stackoverflow.com/questions/4722198/checking-if-my-windows-application-is-running
+        private const string AppId = "98-5F-D3-3B-AA-A6_ApoChan_AnhBijin_longnt0707_Insomnia_Mdj1V6bumTzBgIuDc6I";
+        private readonly Semaphore instancesAllowed = new Semaphore(1, 1, AppId);
+        private bool WasRunning { set; get; }
+
         public InsomniaAppContext()
         {
-            // Initialize Tray Icon
-            trayIcon = new NotifyIcon()
+            //See if application is already running on the system
+            if (this.instancesAllowed.WaitOne(1000))
             {
-                Icon = Properties.Resources.Insomnia,
-                ContextMenu = new ContextMenu(new MenuItem[] {
+                // Initialize Tray Icon
+                trayIcon = new NotifyIcon()
+                {
+                    Icon = Properties.Resources.Insomnia,
+                    ContextMenu = new ContextMenu(new MenuItem[] {
                     new MenuItem("Exit", Exit)
                 }),
-                Visible = true
-            };
+                    Visible = true
+                };
 
-            PowerHelper.ForceSystemAwake();
+                PowerHelper.ForceSystemAwake();
+                this.WasRunning = true;
+                return;
+            }
+            else
+            {
+                //Display
+                MessageBox.Show("An instance of Insomnia is already running");
+
+                //Exit out otherwise
+                this.Exit(null, null);
+            }
         }
 
         void Exit(object sender, EventArgs e)
         {
+            //Decrement the count if app was running
+            if (this.WasRunning)
+            {
+                this.instancesAllowed.Release();
+            }
+
             // Hide tray icon, otherwise it will remain shown until user mouses over it
             trayIcon.Visible = false;
 
